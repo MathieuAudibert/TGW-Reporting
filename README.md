@@ -18,7 +18,7 @@ Firstly, you can **clone the repository** by running
 
 Everything that is needed is in the requirements.txt file. Just run it by using this command :
 
-`pip install -r requirements.txt`
+`pip install -r requirements.txt` or `cat requirements.txt | xargs npm install -g`
 
 ## Usage Tutorial 💡
 Firstly, you must have a get_credentials.txt script wich will do a assume-role of the aws account(s) you are using. 
