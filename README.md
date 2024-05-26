@@ -2,10 +2,11 @@
 Little **Open-Source** python script to report transit-gateways of aws account(s).
 
 ## Main features 🧙
-- List in a python list ***all of the TGW in a AWS acc***.
-- Creates output files in .json and .r format 
-- **Strong unit testing** for the account 
-- **Assume role** tuto (Security ++)
+- 📑 List in a python list ***all of the TGW in a AWS acc***. 
+- 📁 Creates output files in .json and .r format 
+- 💭 **Strong unit testing** for the account 
+- 🔑 **Assume role** tuto (Security ++) 
+- ♻️ **Github actions** to have a better run sort of report 
 
 ## Configuration 🛠
 - Python **3.12** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png"  width="2%" height="2%">
