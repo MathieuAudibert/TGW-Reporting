@@ -1,91 +1,88 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from reporting_transit import get_attachment_cidr, get_table_routes, get_caller_identity, get_transit_gateways
+from reporting_transit import get_attachment_cidr, get_route_tables, get_caller_identity, get_transit_gateways
 
 class TestMain(unittest.TestCase):
     
-    def test_get_caller_identity(self):
+    @patch('reporting_transit.sts_client.get_caller_identity')
+    def test_get_caller_identity(self, mock_get_caller_identity):
         sts_client_response = {
             'Account': '123456789012'
         }
-
-        with patch('your_script.sts_client.get_caller_identity', return_value=sts_client_response):
-            account_id = get_caller_identity()
-            self.assertEqual(account_id, '123456789012')
+        mock_get_caller_identity.return_value = sts_client_response
+        account_id = get_caller_identity()
+        self.assertEqual(account_id, '123456789012')
     
     @patch('reporting_transit.ec2_client.describe_vpcs')
-    def test_get_attachment_cidr_vpc(self, describe_vpcs_mock):
-        describe_vpcs_mock.return_value = {
+    def test_get_attachment_cidr_vpc(self, mock_describe_vpcs):
+        mock_describe_vpcs.return_value = {
             'Vpcs': [{'VpcId': 'vpc-123', 'CidrBlock': 'cidr1'}]
         }
         
-        attachment = {'ResourceId': 'vpc-123', 'ResourceType': 'vpc'}
+        attachment = {'TransitGatewayAttachmentId': 'attachment_id', 'ResourceType': 'vpc'}
         cidr = get_attachment_cidr(attachment)
         
-        self.assertEqual(cidr, 'cidr1')
+        self.assertEqual(cidr, ['cidr1'])
 
     @patch('reporting_transit.ec2_client.describe_vpn_connections')
-    def test_get_attachment_cidr_vpn(self, describe_vpn_connections_mock):
-        describe_vpn_connections_mock.return_value = {
+    def test_get_attachment_cidr_vpn(self, mock_describe_vpn_connections):
+        mock_describe_vpn_connections.return_value = {
             'VpnConnections': [{
-                'CustomerGatewayConfiguration': {
-                    'Tunnels': [{'OutsideIpAddress': 'vpn-ip'}]
-                }
+                'CustomerGatewayConfiguration': json.dumps({
+                    'tunnels': [{'outside_ip_address': 'vpn-ip'}]
+                })
             }]
         }
         
-        attachment = {'ResourceId': 'vpn-123', 'ResourceType': 'vpn'}
+        attachment = {'TransitGatewayAttachmentId': 'vpn-123', 'ResourceType': 'vpn'}
         cidr = get_attachment_cidr(attachment)
         
-        self.assertEqual(cidr, 'vpn-ip')
+        self.assertEqual(cidr, ['vpn-ip'])
 
-    @patch('reporting_transit.ec2_client.describe_direct_connect_gateways')
-    def test_get_attachment_cidr_direct_connect(self, describe_direct_connect_gateways_mock):
-        describe_direct_connect_gateways_mock.return_value = {
-            'DirectConnectGateways': [{'DirectConnectGatewayId': 'direct-connect-id'}]
+    @patch('reporting_transit.botoSession.client')
+    def test_get_attachment_cidr_direct_connect(self, mock_boto_session_client):
+        mock_direct_connect_client = MagicMock()
+        mock_direct_connect_client.describe_direct_connect_gateways.return_value = {
+            'directConnectGateways': [{'directConnectGatewayId': 'direct-connect-id'}]
         }
+        mock_boto_session_client.return_value = mock_direct_connect_client
         
-        attachment = {'ResourceId': 'direct-connect-id', 'ResourceType': 'direct-connect-gateway'}
+        attachment = {'TransitGatewayAttachmentId': 'direct-connect-id', 'ResourceType': 'direct-connect-gateway'}
         cidr = get_attachment_cidr(attachment)
         
-        self.assertEqual(cidr, 'direct-connect-id')
+        self.assertEqual(cidr, ['direct-connect-id'])
 
     @patch('reporting_transit.ec2_client.describe_transit_gateway_route_tables')
-    def test_get_table_routes(self, describe_transit_gateway_route_tables_mock):
-        describe_transit_gateway_route_tables_mock.return_value = {
+    def test_get_route_tables(self, mock_describe_transit_gateway_route_tables):
+        mock_describe_transit_gateway_route_tables.return_value = {
             'TransitGatewayRouteTables': [
                 {
                     'Routes': [
                         {
                             'DestinationCidrBlock': '10.0.0.0/16',
-                            'TargetType': 'transit-gateway',
-                            'Target': {
-                                'TransitGatewayId': 'tgw-123'
-                            }
+                            'State': 'active'
                         },
                         {
                             'DestinationCidrBlock': '192.168.0.0/24',
-                            'TargetType': 'local',
-                            'Target': {}
+                            'State': 'blackhole'
                         }
                     ]
                 }
             ]
         }
         
-        routes = get_table_routes('tgw-123')
+        routes = get_route_tables('tgw-123')
         
         self.assertIsNotNone(routes)
         self.assertEqual(len(routes), 2)
         self.assertEqual(routes[0]['DestinationCidrBlock'], '10.0.0.0/16')
-        self.assertEqual(routes[0]['TargetType'], 'transit-gateway')
-        self.assertEqual(routes[0]['Target'], 'tgw-123')
+        self.assertEqual(routes[0]['State'], 'active')
         self.assertEqual(routes[1]['DestinationCidrBlock'], '192.168.0.0/24')
-        self.assertEqual(routes[1]['TargetType'], 'local')
-        self.assertEqual(routes[1]['Target'], 'N/A')
+        self.assertEqual(routes[1]['State'], 'blackhole')
     
-    @patch('reporting_transit.ec2_client.describe_transit_gateway_route_tables')
-    def test_get_transit_gateways(self):
+    @patch('reporting_transit.ec2_client.describe_transit_gateways')
+    @patch('reporting_transit.ec2_client.describe_transit_gateway_attachments')
+    def test_get_transit_gateways(self, mock_describe_transit_gateway_attachments, mock_describe_transit_gateways):
         ec2_client_tgw_response = {
             'TransitGateways': [
                 {
@@ -105,8 +102,20 @@ class TestMain(unittest.TestCase):
             ]
         }
 
-        with patch('your_script.ec2_client.describe_transit_gateways', return_value=ec2_client_tgw_response), \
-            patch('your_script.ec2_client.describe_transit_gateway_attachments', return_value=ec2_client_attachment_response):
+        mock_describe_transit_gateways.return_value = ec2_client_tgw_response
+        mock_describe_transit_gateway_attachments.return_value = ec2_client_attachment_response
+
+        with patch('reporting_transit.get_attachment_cidr', return_value=['cidr1']), \
+             patch('reporting_transit.get_route_tables', return_value=[
+                {
+                    'DestinationCidrBlock': '10.0.0.0/16',
+                    'State': 'active'
+                },
+                {
+                    'DestinationCidrBlock': '192.168.0.0/24',
+                    'State': 'blackhole'
+                }
+             ]):
             transit_gateways = get_transit_gateways('123456789012', 'us-east-1')
             self.assertEqual(len(transit_gateways), 1)
             self.assertIn('tgw-123', transit_gateways)
@@ -117,7 +126,12 @@ class TestMain(unittest.TestCase):
             attachment = tgw_details['Attachments'][0]
             self.assertEqual(attachment['AttachmentId'], 'attachment_id')
             self.assertEqual(attachment['ResourceType'], 'vpc')
-            self.assertEqual(attachment['Cidr'], 'cidr1')
+            self.assertEqual(attachment['Cidr'], ['cidr1'])
+            self.assertEqual(len(tgw_details['Routes']), 2)
+            self.assertEqual(tgw_details['Routes'][0]['DestinationCidrBlock'], '10.0.0.0/16')
+            self.assertEqual(tgw_details['Routes'][0]['State'], 'active')
+            self.assertEqual(tgw_details['Routes'][1]['DestinationCidrBlock'], '192.168.0.0/24')
+            self.assertEqual(tgw_details['Routes'][1]['State'], 'blackhole')
 
 if __name__ == '__main__':
     unittest.main()

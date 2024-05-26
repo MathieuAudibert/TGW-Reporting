@@ -162,7 +162,6 @@ def to_r(data, account_id, account_name):
     
     print(f"R report saved to {filename}")
 
-# Update main function to include the call to to_r
 def main():
     """
     Run the script
