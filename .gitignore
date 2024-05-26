@@ -1,4 +1,5 @@
 __pycache__/
 *.json
 *.r
-output-files/
+/output-files/*
+!/output-files/
