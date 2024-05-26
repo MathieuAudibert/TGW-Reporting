@@ -7,7 +7,7 @@ Little **Open-Source** python script to report transit-gateways of aws account(s
 - **Strong unit testing** for the account 
 
 ## Configuration 🛠
-- Python **3.12** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png"  width="2%" height="2%">
+- Python **3.12** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png"  width="1%" height="1%">
 - Boto3 **1.3.4** 🌕
 - R **4.2** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/R_logo.svg/1280px-R_logo.svg.png"  width="2%" height="2%">
 
