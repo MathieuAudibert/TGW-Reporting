@@ -1,4 +1,5 @@
 import unittest
+import json
 from unittest.mock import MagicMock, patch
 from reporting_transit import get_attachment_cidr, get_route_tables, get_caller_identity, get_transit_gateways
 

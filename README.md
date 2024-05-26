@@ -8,11 +8,6 @@ Little **Open-Source** python script to report transit-gateways of aws account(s
 - 🔑 **Assume role** tuto (Security ++) 
 - ♻️ **Github actions** to have a better run sort of report 
 
-## Configuration 🛠
-- Python **3.12** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png"  width="2%" height="2%">
-- Boto3 **1.3.4** 🌕
-- R **4.2** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/R_logo.svg/1280px-R_logo.svg.png"  width="2%" height="2%">
-
 ## Installation ⚙️
 Firstly, you can **clone the repository** by running 
 
@@ -21,6 +16,11 @@ Firstly, you can **clone the repository** by running
 Everything that is needed is in the requirements.txt file. Just run it by using this command :
 
 `pip install -r requirements.txt` or `cat requirements.txt | xargs npm install -g`
+
+## Configuration 🛠
+- Python **3.12** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png"  width="2%" height="2%">
+- Boto3 **1.3.4** 🌕
+- R **4.2** <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/R_logo.svg/1280px-R_logo.svg.png"  width="2%" height="2%">
 
 ## Usage Tutorial 💡
 Firstly, you must have a get_credentials.txt script wich will do a assume-role of the aws account(s) you are using. 
