@@ -12,9 +12,17 @@ Little **Open-Source** python script to report transit-gateways of aws account(s
 - R **4.2**
 
 ## Installation ⚙️
-Firstly, you can **clone the repository** by running `git clone https://github.com/MathieuAudibert/TGW-Reporting` or `gh repo clone MathieuAudibert/TGW-Reporting`
+Firstly, you can **clone the repository** by running 
 
-Everything that is needed is in the requirements.txt file. Just run it by using this command `pip install -r requirements.txt`
+`git clone https://github.com/MathieuAudibert/TGW-Reporting` 
+
+or 
+
+`gh repo clone MathieuAudibert/TGW-Reporting`
+
+Everything that is needed is in the requirements.txt file. Just run it by using this command 
+
+`pip install -r requirements.txt`
 
 ## Usage Tutorial 💡
 Firstly, you must have a get_credentials.txt script wich will do a assume-role of the aws account(s) you are using. 
