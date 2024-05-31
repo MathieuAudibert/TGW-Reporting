@@ -6,11 +6,9 @@ import pandas as pd
 from pathlib import Path
 import subprocess
 
-# Set AWS profile
 a = input('AWS profile used: ')
 subprocess.run(['set', f'AWS_PROFILE={a}'], shell=True)
 
-# Initialize boto3 session
 botoSession = boto3.Session()
 dc_client = botoSession.client('directconnect')
 sts_client = boto3.client('sts')

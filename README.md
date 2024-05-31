@@ -1,3 +1,7 @@
+![State](https://img.shields.io/badge/State-On_Date-green)
+
+![Status](https://img.shields.io/badge/Status-Draft-orange)
+
 # TGW-Reporting 🔌
 Little **Open-Source** python script to report transit-gateways of aws account(s).
 
