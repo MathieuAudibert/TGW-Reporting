@@ -2,8 +2,7 @@ __pycache__/
 *.json
 *.r
 
+testfile.*
+
+
 /output-files/*
-
-!/output-files/
-
-testfile.py
