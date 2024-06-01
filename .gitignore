@@ -1,8 +1,16 @@
 __pycache__/
+
+#Ignore my json/r output files
 *.json
 *.r
 
+#Ignore my testfiles
 testfile
 
-
+#Ignore everything in the output-files directory
 /output-files/*
+
+#but dont ignore the output-files directory itself
+!/output-files/
+
+!/output-files/.gitkeep
