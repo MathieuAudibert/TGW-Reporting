@@ -3,7 +3,6 @@
 import json
 import os
 import boto3
-import pandas as pd
 
 botoSession = boto3.Session()
 sts_client = botoSession.client('sts')
