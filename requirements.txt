@@ -1,4 +1,3 @@
 npm i boto3
-npm i pandas
 npm i unittest
 npm i r
