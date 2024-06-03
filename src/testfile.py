@@ -6,9 +6,11 @@ import pandas as pd
 from pathlib import Path
 import subprocess
 
+# Set AWS profile
 a = input('AWS profile used: ')
 subprocess.run(['set', f'AWS_PROFILE={a}'], shell=True)
 
+# Initialize boto3 session
 botoSession = boto3.Session()
 dc_client = botoSession.client('directconnect')
 sts_client = boto3.client('sts')
@@ -33,8 +35,12 @@ def get_route_table_id(tgw_id):
                 }
             ]
         )
-        rt_id = res['TransitGatewayRouteTables'][0]['TransitGatewayRouteTableId']
-        return rt_id
+        if res['TransitGatewayRouteTables']:
+            rt_id = res['TransitGatewayRouteTables'][0]['TransitGatewayRouteTableId']
+            return rt_id
+        else:
+            print(f"No route tables found for TGW ID: {tgw_id}")
+            return None
     except Exception as e:
         print(str(e))
         return None
@@ -56,7 +62,7 @@ def get_route_tables(tgw_id):
         )
 
         routes = []
-        for route in res['Routes']:
+        for route in res.get('Routes', []):
             routes.append({
                 'DestinationCidrBlock': route.get('DestinationCidrBlock', ''),
                 'TargetType': route.get('Type', ''), 
@@ -72,7 +78,7 @@ def get_transit_gateways(account_id, region):
     try:
         res = ec2_client.describe_transit_gateways()
         transit_gateways = {}
-        for tgw in res['TransitGateways']:
+        for tgw in res.get('TransitGateways', []):
             tgw_id = tgw['TransitGatewayId']
             tgw_details = {
                 'Owner': tgw['OwnerId'],
@@ -89,7 +95,7 @@ def get_transit_gateways(account_id, region):
             )
 
             attachment_info = []
-            for attachment in attachments['TransitGatewayAttachments']:
+            for attachment in attachments.get('TransitGatewayAttachments', []):
                 attachment_info.append({
                     'AttachmentId': attachment['TransitGatewayAttachmentId'],
                     'ResourceType': attachment['ResourceType'],
@@ -178,7 +184,7 @@ def main():
             
             try:
                 to_csv(transit_gateways, account_name)
-                print("\n TO CVS OK \n")
+                print("\n TO CSV OK \n")
 
             except Exception as e:
                 print("TO CSV KO")
