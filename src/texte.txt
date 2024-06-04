@@ -1,0 +1,11 @@
+#### L'Organisation Interne de la Société Générale
+
+La Société Générale est structurée pour répondre efficacement aux besoins variés de ses clients tout en assurant une gestion interne fluide et cohérente. L'organisation interne repose sur une division claire des responsabilités et une communication efficace entre les différents services.
+
+Le groupe est divisé en plusieurs branches principales : la banque de détail, la banque de financement et d'investissement, les services financiers internationaux, et les assurances. Chaque branche est dirigée par un comité exécutif qui veille à la mise en œuvre des stratégies globales de l'entreprise.
+
+Dans le cadre de cette structure, le service dans lequel je travaille, GTS (Global Technology Services), occupe une place essentielle. GTS englobe plusieurs sous-divisions, dont PLT (Platform). Au sein de PLT, je fais partie de l'équipe GTC (Go to Cloud), plus spécifiquement de la section Network. Sous la direction de Vincent Hoose, notre équipe Network se concentre sur le développement et la gestion des infrastructures réseau nécessaires à la transition vers le cloud. Nous travaillons sur des projets visant à améliorer la connectivité, la sécurité et l'efficacité des solutions cloud de la Société Générale.
+
+La communication interne au sein de la Société Générale est également un aspect fondamental de son organisation. Des outils numériques tels que des intranets, des plateformes collaboratives et des newsletters internes sont utilisés pour maintenir une communication transparente et efficace. Ces outils facilitent le partage d'informations, la collaboration entre les différentes équipes et la diffusion rapide des mises à jour importantes. De plus, des réunions régulières et des sessions de formation sont organisées pour assurer que tous les employés sont informés des dernières évolutions et des meilleures pratiques.
+
+Cette structure organisationnelle et cette communication interne bien huilée permettent à la Société Générale de fonctionner de manière efficace et harmonieuse, tout en restant agile face aux changements du marché et aux besoins des clients.
