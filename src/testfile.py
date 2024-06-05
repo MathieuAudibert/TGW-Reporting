@@ -112,12 +112,16 @@ def get_transit_gateways(account_id, region):
         return None
     
 def to_json(data, account_name):
-    filename = f'tgw_output_{account_name}.json'
-    home_path = Path.home()
-    mypath = home_path / filename
+    try:
+        filename = f'tgw_output-{account_name}.json'
+        home_path = str(Path.home())
+        mypath = Path(home_path) / filename
 
-    with mypath.open('w') as f:
-        json.dump(data, f, indent=4)
+        with open(mypath, 'w') as f:
+            json.dump(data, f, indent=4)
+        print(f"JSON file created at {mypath}")
+    except Exception as e:
+        print(f"to_json error: {str(e)}")
 
 def to_csv(data, account_name):
     rows = []
