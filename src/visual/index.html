@@ -1,0 +1,42 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transit Gateway Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <h1>Transit Gateways</h1>
+    <div id="visualization"></div>
+
+    <script>
+        fetch('/api/transit_gateways')
+            .then(response => response.json())
+            .then(data => {
+                const svg = d3.select("#visualization")
+                              .append("svg")
+                              .attr("width", 800)
+                              .attr("height", 600);
+
+                // Simple visualization logic for demo purposes
+                svg.selectAll("circle")
+                   .data(data)
+                   .enter()
+                   .append("circle")
+                   .attr("cx", (d, i) => (i + 1) * 100)
+                   .attr("cy", 100)
+                   .attr("r", 40)
+                   .attr("fill", "blue");
+
+                svg.selectAll("text")
+                   .data(data)
+                   .enter()
+                   .append("text")
+                   .attr("x", (d, i) => (i + 1) * 100)
+                   .attr("y", 200)
+                   .text(d => d.TransitGatewayId)
+                   .attr("fill", "black");
+            });
+    </script>
+</body>
+</html>
