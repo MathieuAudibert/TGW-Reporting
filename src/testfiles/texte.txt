@@ -1,9 +1,10 @@
 import json
 import pandas as pd
 from pathlib import Path
+import os
 
 def read_json_file(json_path):
-    with open(json_path, 'r') as f:
+    with json_path.open('r') as f:
         return json.load(f)
 
 def read_csv_file(csv_path):
@@ -62,16 +63,24 @@ The CSV output provides a tabular view of the transit gateways, attachments, and
 </div>
 """
 
-    with open(output_md_path, 'w') as f:
+    with output_md_path.open('w') as f:
         f.write(md_content)
 
 def main():
-    account_name = 'example-account'  # Replace this with the actual account name
-    home_path = str(Path.home())
+    account_name = 'group1'  # Replace this with the actual account name
+    base_dir = Path(os.getenv('OUTPUT_BASE_DIR', 'output'))
 
-    json_path = Path(home_path, f'tgw_output-{account_name}.json')
-    csv_path = Path(home_path, f'tgw_output-{account_name}.csv')
-    output_md_path = Path(home_path, f'tgw_output-{account_name}.md')
+    json_path = base_dir / f'tgw_output-{account_name}.json'
+    csv_path = base_dir / f'tgw_output-{account_name}.csv'
+    output_md_path = base_dir / f'tgw_output-{account_name}.md'
+
+    if not json_path.exists():
+        print(f"JSON file not found: {json_path}")
+        return
+
+    if not csv_path.exists():
+        print(f"CSV file not found: {csv_path}")
+        return
 
     json_data = read_json_file(json_path)
     csv_data = read_csv_file(csv_path)
