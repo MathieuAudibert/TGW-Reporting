@@ -1,9 +1,9 @@
-res = ec2_client.search_transit_gateway_routes(
-            TransitGatewayRouteTableId=rt_id,
-            Filters=[
-                {
-                    'Name': 'state',
-                    'Values': ['active']
-                }
-            ]
-        )
+Comme je viens de vous le présenter, la Société Générale contient de nombreuses équipes et répartit ses employés dans diverses sous-catégories pour maximiser l'efficacité et la spécialisation. L'équipe Network est celle qui m'a pris en charge durant ces deux mois de stage. Cette équipe est constituée de cinq personnes :
+
+- **M. Barrière, Tech Lead Public Cloud** : Il dirige une équipe de développeurs et supervise les projets techniques.
+- **Mme. Ait Ahmed, XP2 Cloud SAS** : Consultante cloud Azure & DevOps en prestation.
+- **M. Belghith, DevOps Pub [a(Ctri) - 1** : Contraction de développeur et opération, il met en place des outils pour fluidifier la création de produits.
+- **M. Gillery, XP2 Cloud** : Prestataire/Dev.
+- **M. Temala, Agyla SAS** : Consultant cloud Azure & DevOps en prestation.
+
+L'équipe communique régulièrement sur Teams et organise tous les jours, de 11h30 à 12h, un "daily". Cette réunion quotidienne permet à chaque membre de l'équipe de partager ce qu'il a accompli dans les dernières 24 heures et ce qu'il prévoit de faire dans les prochaines 24 heures. Pour garder une trace claire des missions et des progrès, l'équipe utilise des tickets Jira. De plus, l'entreprise utilise un GitHub entreprise où sont répertoriés tous les services avec des git issues et des pull requests, ce qui permet de suivre l'avancement de tous les produits de manière transparente et collaborative.
