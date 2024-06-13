@@ -1,3 +1,22 @@
+import json
+import pandas as pd
+from pathlib import Path
+
+def read_json_file(json_path):
+    with open(json_path, 'r') as f:
+        return json.load(f)
+
+def read_csv_file(csv_path):
+    return pd.read_csv(csv_path)
+
+def generate_markdown(json_data, csv_data, output_md_path):
+    # Convert the JSON content to a pretty-printed string
+    json_str = json.dumps(json_data, indent=4)
+    
+    # Convert the DataFrame to CSV string
+    csv_str = csv_data.to_csv(index=False)
+    
+    md_content = f"""
 # Reporting Transit
 
 ## What is the Reporting Transit?
@@ -30,34 +49,35 @@ The Reporting Transit is a Python script designed to generate detailed reports o
 
 The JSON output provides a detailed, structured view of the transit gateways, attachments, and routes.
 
-```json
-{
-    "tgw-0123456789abcdef0": {
-        "Owner": "123456789012",
-        "State": "available",
-        "Attachments": [
-            {
-                "AttachmentId": "tgw-attach-0abcdef1234567890",
-                "ResourceType": "vpc",
-                "Owner": "123456789012",
-                "Routes": [
-                    {
-                        "DestinationCidrBlock": "10.0.0.0/16",
-                        "TargetType": "vpc",
-                        "PrefixList": "pl-12345678"
-                    },
-                    ...
-                ]
-            },
-            ...
-        ]
-    },
-    ...
-}
+<div style="border: 1px solid #ccc; padding: 10px; overflow: auto; max-height: 400px;">
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">{json_str}</pre>
+</div>
 
+### CSV Output
 
+The CSV output provides a tabular view of the transit gateways, attachments, and routes, which can be easily imported into spreadsheets or databases.
 
+<div style="border: 1px solid #ccc; padding: 10px; overflow: auto; max-height: 400px;">
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">{csv_str}</pre>
+</div>
+"""
 
+    with open(output_md_path, 'w') as f:
+        f.write(md_content)
 
+def main():
+    account_name = 'example-account'  # Replace this with the actual account name
+    home_path = str(Path.home())
 
+    json_path = Path(home_path, f'tgw_output-{account_name}.json')
+    csv_path = Path(home_path, f'tgw_output-{account_name}.csv')
+    output_md_path = Path(home_path, f'tgw_output-{account_name}.md')
 
+    json_data = read_json_file(json_path)
+    csv_data = read_csv_file(csv_path)
+
+    generate_markdown(json_data, csv_data, output_md_path)
+    print(f"Markdown file generated at {output_md_path}")
+
+if __name__ == "__main__":
+    main()
