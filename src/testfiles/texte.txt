@@ -11,10 +11,7 @@ def read_csv_file(csv_path):
     return pd.read_csv(csv_path)
 
 def generate_markdown(json_data, csv_data, output_md_path):
-    # Convert the JSON content to a pretty-printed string
     json_str = json.dumps(json_data, indent=4)
-    
-    # Convert the DataFrame to CSV string
     csv_str = csv_data.to_csv(index=False)
     
     md_content = f"""
@@ -68,11 +65,12 @@ The CSV output provides a tabular view of the transit gateways, attachments, and
 
 def main():
     account_name = 'group1'  # Replace this with the actual account name
-    base_dir = Path(os.getenv('OUTPUT_BASE_DIR', 'output'))
+    script_dir = Path(__file__).parent.resolve()
+    output_dir = script_dir / 'output'
 
-    json_path = base_dir / f'tgw_output-{account_name}.json'
-    csv_path = base_dir / f'tgw_output-{account_name}.csv'
-    output_md_path = base_dir / f'tgw_output-{account_name}.md'
+    json_path = output_dir / f'tgw_output-{account_name}.json'
+    csv_path = output_dir / f'tgw_output-{account_name}.csv'
+    output_md_path = output_dir / f'tgw_output-{account_name}.md'
 
     if not json_path.exists():
         print(f"JSON file not found: {json_path}")
