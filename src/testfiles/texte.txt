@@ -1,11 +1,63 @@
-Le stage est une étape cruciale dans le parcours de chaque étudiant, offrant l'occasion de mettre en pratique les connaissances théoriques acquises pendant la formation. Ces dernières semaines, j'ai eu l'opportunité de travailler chez la Société Générale, une expérience enrichissante qui m'a permis de découvrir le monde professionnel et d'approfondir mes compétences dans le domaine de l'informatique.
+# Reporting Transit
 
-La Société Générale est reconnue dans le secteur pour son expertise et son engagement constant dans l'innovation technologique. En tant qu'acteur majeur du secteur bancaire, elle occupe une position privilégiée. Pendant mon stage, j'ai intégré le service Global Technology Services (GTS), au sein de la sous-division Plateform (PLT), plus précisément dans l'équipe Go to Cloud (GTC) - Network. J'ai eu la chance de collaborer avec une équipe dynamique et compétente.
+## What is the Reporting Transit?
 
-Dès le début de mon stage, j'ai établi des objectifs clairs en accord avec l'équipe d'encadrement. Mon principal objectif était de mettre en pratique mes compétences techniques en gestion et maintenance des infrastructures réseau pour une application concrète au sein d'une entreprise spécialisée. De plus, je souhaitais approfondir mes connaissances en cloud computing et DevOps en me confrontant à des problématiques réelles du secteur.
+The Reporting Transit is a Python script designed to generate detailed reports on AWS Transit Gateways. It provides comprehensive information about transit gateways, their attachments, and associated routes, which can be vital for managing and auditing network infrastructure.
 
-Avant de commencer mon stage, j'ai dû signer une clause de confidentialité qui souligne l'importance du respect des informations et des données sensibles de l'entreprise. Je m'engage donc à ne pas divulguer d'informations confidentielles dans le cadre de ce rapport de stage.
+## Why Use It?
 
-Dans ce contexte, le sujet qui m'a été confié pour mon stage concerne le développement et la gestion des infrastructures réseau nécessaires à la transition vers le cloud. Ce sujet est d'une importance capitale dans le domaine de l'informatique, nécessitant une analyse approfondie et la mise en place de solutions pertinentes. Il constitue un enjeu stratégique pour l'entreprise, donné son impact sur toutes les couches applicatives nécessitant des informations fiables et sécurisées.
+- **Centralized Information**: It consolidates data from multiple AWS accounts and regions into a single, coherent report.
+- **Auditing**: Facilitates compliance and security audits by providing a clear overview of network configurations.
+- **Troubleshooting**: Helps identify and resolve network issues by visualizing the transit gateway connections and routes.
+- **Documentation**: Generates documentation that can be used for knowledge sharing and operational purposes.
 
-Ce rapport de stage est structuré comme suit : dans une première partie, je présenterai le contexte général et l'organisation du service dans lequel j'ai évolué. Ensuite, je décrirai en détail les tâches que j'ai réalisées au sein de l'équipe Network. Dans une troisième partie, j'analyserai les résultats obtenus, les enseignements tirés de mon expérience, les compétences développées, ainsi que les perspectives futures.
+## Key Features
+
+- **Multi-Account Support**: Capable of assuming roles across different AWS accounts to gather comprehensive data.
+- **Detailed Reports**: Provides detailed information about each transit gateway, including attachments and associated routes.
+- **Multiple Output Formats**: Generates reports in JSON, CSV, and Markdown formats to suit different use cases and tools.
+- **Automated**: Simplifies the process of collecting and reporting transit gateway data, saving time and reducing manual effort.
+
+## Limitations
+
+- **Permissions**: Requires appropriate permissions to access transit gateway information across all targeted AWS accounts and regions.
+- **Regional Constraints**: Data is collected per region, which means the script must be run for each region where transit gateways are present.
+- **Complexity**: The script assumes familiarity with AWS and Python, which might be a barrier for some users.
+
+## Data
+
+### JSON Output
+
+The JSON output provides a detailed, structured view of the transit gateways, attachments, and routes.
+
+```json
+{
+    "tgw-0123456789abcdef0": {
+        "Owner": "123456789012",
+        "State": "available",
+        "Attachments": [
+            {
+                "AttachmentId": "tgw-attach-0abcdef1234567890",
+                "ResourceType": "vpc",
+                "Owner": "123456789012",
+                "Routes": [
+                    {
+                        "DestinationCidrBlock": "10.0.0.0/16",
+                        "TargetType": "vpc",
+                        "PrefixList": "pl-12345678"
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    },
+    ...
+}
+
+
+
+
+
+
+
