@@ -1,59 +1,99 @@
-import unittest
-from unittest.mock import patch, MagicMock
-import boto3
-from botocore.stub import Stubber
+import json
+import pandas as pd
+from pathlib import Path
+import subprocess
 
-class TestTGWScript(unittest.TestCase):
+def read_json_file(json_path):
+    with json_path.open('r') as f:
+        return json.load(f)
 
-    @patch('your_script_name.boto3.client')
-    def test_get_caller_identity(self, mock_boto_client):
-        sts_client = boto3.client('sts')
-        with Stubber(sts_client) as stubber:
-            expected_response = {'Account': '123456789012', 'UserId': 'ABCDEFGHIJKL', 'Arn': 'arn:aws:sts::123456789012:assumed-role/Admin/user'}
-            stubber.add_response('get_caller_identity', expected_response)
-            mock_boto_client.return_value = sts_client
+def read_csv_file(csv_path):
+    return pd.read_csv(csv_path)
 
-            account_id = get_caller_identity(sts_client)
-            self.assertEqual(account_id, '123456789012')
+def generate_markdown(json_data, csv_data, output_md_path):
+    md_content = f"""
+# Reporting Transit
 
-    @patch('your_script_name.boto3.client')
-    def test_get_route_table_id(self, mock_boto_client):
-        ec2_client = boto3.client('ec2')
-        with Stubber(ec2_client) as stubber:
-            expected_response = {
-                'TransitGatewayRouteTables': [
-                    {'TransitGatewayRouteTableId': 'tgw-rtb-0123456789abcdef0'}
-                ]
-            }
-            stubber.add_response('describe_transit_gateway_route_tables', expected_response)
-            mock_boto_client.return_value = ec2_client
+## What is the Reporting Transit?
 
-            tgw_id = 'tgw-0123456789abcdef0'
-            route_table_id = get_route_table_id(ec2_client, tgw_id)
-            self.assertEqual(route_table_id, 'tgw-rtb-0123456789abcdef0')
+The Reporting Transit is a Python script designed to generate detailed reports on AWS Transit Gateways. It provides comprehensive information about transit gateways, their attachments, and associated routes, which can be vital for managing and auditing network infrastructure.
 
-    @patch('your_script_name.boto3.client')
-    def test_get_route_tables(self, mock_boto_client):
-        ec2_client = boto3.client('ec2')
-        with Stubber(ec2_client) as stubber:
-            describe_response = {
-                'TransitGatewayRouteTables': [
-                    {'TransitGatewayRouteTableId': 'tgw-rtb-0123456789abcdef0'}
-                ]
-            }
-            search_response = {
-                'Routes': [
-                    {'DestinationCidrBlock': '10.0.0.0/16', 'Type': 'static', 'PrefixListId': 'pl-0123456789abcdef0'}
-                ]
-            }
-            stubber.add_response('describe_transit_gateway_route_tables', describe_response)
-            stubber.add_response('search_transit_gateway_routes', search_response)
-            mock_boto_client.return_value = ec2_client
+## Why Use It?
 
-            tgw_id = 'tgw-0123456789abcdef0'
-            routes = get_route_tables(ec2_client, tgw_id)
-            self.assertEqual(len(routes), 1)
-            self.assertEqual(routes[0]['DestinationCidrBlock'], '10.0.0.0/16')
+- **Centralized Information**: It consolidates data from multiple AWS accounts and regions into a single, coherent report.
+- **Auditing**: Facilitates compliance and security audits by providing a clear overview of network configurations.
+- **Troubleshooting**: Helps identify and resolve network issues by visualizing the transit gateway connections and routes.
+- **Documentation**: Generates documentation that can be used for knowledge sharing and operational purposes.
 
-if __name__ == '__main__':
-    unittest.main()
+## Key Features
+
+- **Multi-Account Support**: Capable of assuming roles across different AWS accounts to gather comprehensive data.
+- **Detailed Reports**: Provides detailed information about each transit gateway, including attachments and associated routes.
+- **Multiple Output Formats**: Generates reports in JSON, CSV, and Markdown formats to suit different use cases and tools.
+- **Automated**: Simplifies the process of collecting and reporting transit gateway data, saving time and reducing manual effort.
+
+## Limitations
+
+- **Permissions**: Requires appropriate permissions to access transit gateway information across all targeted AWS accounts and regions.
+- **Regional Constraints**: Data is collected per region, which means the script must be run for each region where transit gateways are present.
+- **Complexity**: The script assumes familiarity with AWS and Python, which might be a barrier for some users.
+
+## Data
+
+### JSON Output
+
+The JSON output provides a detailed, structured view of the transit gateways, attachments, and routes.
+
+<div style="border: 1px solid #ccc; padding: 10px; overflow: auto; max-height: 400px;">
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">{json.dumps(json_data, indent=4)}</pre>
+</div>
+
+### CSV Output
+
+The CSV output provides a tabular view of the transit gateways, attachments, and routes, which can be easily imported into spreadsheets or databases.
+
+<div style="border: 1px solid #ccc; padding: 10px; overflow: auto; max-height: 400px;">
+    <pre style="white-space: pre-wrap; word-wrap: break-word;">{csv_data.to_csv(index=False)}</pre>
+</div>
+
+## Transit Gateway Routes
+"""
+    for tgw_id, tgw_details in json_data.items():
+        md_content += f"\n## Transit Gateway ID: {tgw_id}\n"
+        md_content += f"**Owner:** {tgw_details['Owner']} | **State:** {tgw_details['State']}\n\n"
+        for attachment in tgw_details['Attachments']:
+            md_content += f"### Attachment ID: {attachment['AttachmentId']} (Resource Type: {attachment['ResourceType']}, Owner: {attachment['Owner']})\n"
+            md_content += "| DestinationCidrBlock | TargetType | PrefixList |\n"
+            md_content += "|----------------------|------------|------------|\n"
+            for route in tgw_details['Routes']:
+                md_content += f"| {route['DestinationCidrBlock']} | {route['TargetType']} | {route.get('PrefixList', '')} |\n"
+            md_content += "\n"
+
+    with output_md_path.open('w') as f:
+        f.write(md_content)
+
+def main():
+    account_name = 'group1'  # Replace this with the actual account name
+    script_dir = Path(__file__).parent.resolve()
+    output_dir = script_dir / 'output'
+
+    json_path = output_dir / f'tgw_output-{account_name}.json'
+    csv_path = output_dir / f'tgw_output-{account_name}.csv'
+    output_md_path = output_dir / f'tgw_output-{account_name}.md'
+
+    if not json_path.exists():
+        print(f"JSON file not found: {json_path}")
+        return
+
+    if not csv_path.exists():
+        print(f"CSV file not found: {csv_path}")
+        return
+
+    json_data = read_json_file(json_path)
+    csv_data = read_csv_file(csv_path)
+
+    generate_markdown(json_data, csv_data, output_md_path)
+    print(f"Markdown file generated at {output_md_path}")
+
+if __name__ == "__main__":
+    main()
