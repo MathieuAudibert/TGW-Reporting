@@ -1,15 +1,40 @@
-### Formations au sein de la Société Générale
+def get_transit_gateways():
+    ec2_client = boto3.client('ec2')
 
-Durant mon stage à la Société Générale, un aspect crucial de mon parcours a été la participation à diverses formations en ligne. Ces formations sont un élément fondamental de la politique de développement professionnel de l'entreprise, visant à renforcer les compétences et les connaissances des employés dans des domaines clés. Les thèmes abordés étaient variés et couvraient des sujets aussi essentiels que les risques légaux, le blanchiment d'argent, la corruption et les conflits d'intérêt.
+    try:
+        res = ec2_client.describe_transit_gateways()
+        transit_gateways = {}
 
-Les formations sur les risques légaux sont particulièrement importantes dans le secteur bancaire, où les réglementations et les lois évoluent constamment. Comprendre ces aspects est essentiel pour assurer la conformité et éviter des sanctions potentiellement coûteuses. Pendant ces formations, j'ai appris à identifier les différentes formes de risques légaux et à mettre en place des mesures préventives efficaces. Ce savoir est crucial pour protéger l'intégrité de l'institution financière et maintenir la confiance des clients et des régulateurs.
+        for tgw in res.get('TransitGateways', []):
+            tgw_id = tgw['TransitGatewayId']
+            tgw_details = {
+                'Owner': tgw['OwnerId'],
+                'State': tgw['State']
+            }
 
-Le blanchiment d'argent est un autre sujet critique pour les banques. La formation sur ce thème m'a permis de comprendre les mécanismes par lesquels des fonds illégaux peuvent être introduits dans le système financier et les méthodes utilisées pour les dissimuler. J'ai appris à reconnaître les signaux d'alerte et à appliquer les procédures de diligence raisonnable pour prévenir de tels actes. Cette connaissance est indispensable pour les employés de banque, car le blanchiment d'argent peut avoir des conséquences juridiques et financières graves pour l'institution.
+            attachments = ec2_client.describe_transit_gateway_attachments(
+                Filters=[
+                    {
+                        'Name': 'transit-gateway-id',
+                        'Values': [tgw_id]
+                    }
+                ]
+            )
 
-La formation sur la corruption a couvert les différentes formes de corruption, les cadres législatifs existants et les stratégies pour y faire face. La corruption est un problème mondial qui peut nuire gravement à la réputation et à la performance d'une entreprise. J'ai acquis des compétences pour identifier les situations à risque et pour adopter une conduite éthique dans toutes les transactions et interactions professionnelles.
-
-Les conflits d'intérêt, enfin, sont des situations où les intérêts personnels peuvent entrer en conflit avec les obligations professionnelles. La formation sur ce sujet m'a aidé à comprendre comment détecter ces conflits et à agir de manière transparente et impartiale. La gestion des conflits d'intérêt est essentielle pour maintenir la confiance des clients et des partenaires commerciaux.
-
-Ces formations ont été complétées par des modules pratiques et des évaluations pour garantir une compréhension approfondie des sujets. Elles étaient accessibles en ligne, ce qui permettait une grande flexibilité pour les suivre à mon rythme. L'investissement de la Société Générale dans ces programmes de formation montre l'importance qu'elle accorde à l'éthique, à la conformité et à la compétence professionnelle de ses employés.
-
-En somme, les formations que j'ai suivies ont enrichi ma compréhension des enjeux légaux et éthiques du secteur bancaire et m'ont équipé des outils nécessaires pour naviguer dans cet environnement complexe. Elles ont renforcé ma capacité à contribuer positivement à l'organisation et à me préparer pour des responsabilités futures. Ces apprentissages seront inestimables pour ma carrière, que ce soit au sein de la Société Générale ou dans toute autre institution financière.
+            attachment_data = []
+            for attachment in attachments.get('TransitGatewayAttachments', []):
+                routes = get_route_tables(tgw_id)  # Ensure routes are fetched for each attachment
+                attachment_data.append({
+                    'AttachmentId': attachment['TransitGatewayAttachmentId'],
+                    'ResourceType': attachment['ResourceType'],
+                    'Owner': attachment['ResourceOwnerId'],
+                    'Routes': routes
+                })
+            tgw_details['Attachments'] = attachment_data
+            transit_gateways[tgw_id] = tgw_details
+        
+        return transit_gateways
+    
+    except Exception as e:
+        print(str(e))
+        return None
