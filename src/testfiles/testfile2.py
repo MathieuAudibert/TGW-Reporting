@@ -1,30 +1,19 @@
-def to_csv(data, acc_name):
-    try:
-        rows = []
+def generate_markdown(json_data, output_md_path):
+    md_content = f"""
+# Reporting blablabla
 
-        for tgw_id, tgw_details in data.items():
-            for attachment in tgw_details['Attachments']:
-                for route in attachment.get('Routes', []):
-                    rows.append({
-                        'TGW id': tgw_id,
-                        'Owner': tgw_details['Owner'],
-                        'State': tgw_details['State'],
-                        'AttachmentId': attachment['AttachmentId'],
-                        'Resource Type': attachment['ResourceType'],
-                        'Attachment Owner': attachment['Owner'],
-                        'Destination CIDR': route['DestinationCidrBlock'],
-                        'Target Type': route['TargetType'],
-                        'Prefix List': route['PrefixList']
-                    })
-        
-        df = pd.DataFrame(rows)
-        folderpath = Path(f'output/{acc_name}')
-        folderpath.mkdir(parents=True, exist_ok=True)
-
-        filename = folderpath / f'tgw_output-{acc_name}.csv'
-        df.to_csv(filename, index=False)
+# Routing
+"""
+    for tgw_id, tgw_details in json_data.items():
+        md_content += f"\n ## TGW id: {tgw_id}\n"
+        md_content += f"**Owner:** {tgw_details['Owner']} | **State:** {tgw_details['State']}\n \n"
+        for attachment in tgw_details['Attachments']:
+            md_content += f"## Attachment ID: {attachment['AttachmentId']} | Resource Type: {attachment['ResourceType']} | Owner: {attachment['Owner']}\n"
+            md_content += f"| Destination CIDR | Target Type | Prefix List |\n"
+            md_content += f"| --- | --- | --- |\n"
+            for route in attachment.get('Routes', []):
+                md_content += f"| {route['DestinationCidrBlock']} | {route['TargetType']} | {route['PrefixList']} |\n"
+            md_content += "\n"
     
-    except Exception as e:
-        print(str(e))
-        return None
-
+    with open(output_md_path, 'w') as f:
+        f.write(md_content)
