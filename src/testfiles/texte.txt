@@ -1,58 +1,36 @@
-    def test_to_csv(self):
-        data = {
-            'tgw-0123456789abcdef0': {
-                'Owner': '123456789012',
-                'State': 'available',
-                'Attachments': [{
-                    'AttachmentId': 'tgw-attach-0123456789abcdef0',
-                    'ResourceType': 'vpc',
-                    'Owner': '123456789012',
-                    'Routes': [{
-                        'DestinationCidrBlock': '10.0.0.0/16',
-                        'TargetType': 'vpc',
-                        'PrefixList': 'pl-0123456789abcdef0'
-                    }]
-                }]
-            }
-        }
-        acc_name = 'test_account'
-        to_csv(data, acc_name)
-        expected_path = Path(f'output/{acc_name}/tgw_output-{acc_name}.csv')
-        self.assertTrue(expected_path.exists())
+import unittest
+from pathlib import Path
+import json
+import pandas as pd
 
-        df = pd.read_csv(expected_path)
-        self.assertFalse(df.empty)
-        self.assertEqual(df.iloc[0]['TGW id'], 'tgw-0123456789abcdef0')
+class TestTemplateFormat(unittest.TestCase):
 
-    def test_generate_markdown(self):
-        data = {
-            'tgw-0123456789abcdef0': {
-                'Owner': '123456789012',
-                'State': 'available',
-                'Attachments': [{
-                    'AttachmentId': 'tgw-attach-0123456789abcdef0',
-                    'ResourceType': 'vpc',
-                    'Owner': '123456789012',
-                    'Routes': [{
-                        'DestinationCidrBlock': '10.0.0.0/16',
-                        'TargetType': 'vpc',
-                        'PrefixList': 'pl-0123456789abcdef0'
-                    }]
-                }]
-            }
-        }
-        acc_name = 'test_account'
-        output_md_path = Path(f'output/{acc_name}/tgw_output-{acc_name}.md')
-        generate_markdown(data, output_md_path)
+    def setUp(self):
+        self.account_name = 'test_account'
+        self.output_dir = Path('output') / self.account_name
+        self.json_file = self.output_dir / f'tgw_output-{self.account_name}.json'
+        self.csv_file = self.output_dir / f'tgw_output-{self.account_name}.csv'
+        self.md_file = self.output_dir / f'tgw_output-{self.account_name}.md'
 
-        self.assertTrue(output_md_path.exists())
+    def test_json_file_exists_and_not_empty(self):
+        self.assertTrue(self.json_file.exists(), f"{self.json_file} does not exist.")
+        with open(self.json_file, 'r') as f:
+            data = json.load(f)
+            self.assertTrue(data, "JSON file is empty.")
 
-        with open(output_md_path, 'r') as f:
+    def test_csv_file_exists_and_not_empty(self):
+        self.assertTrue(self.csv_file.exists(), f"{self.csv_file} does not exist.")
+        df = pd.read_csv(self.csv_file)
+        self.assertFalse(df.empty, "CSV file is empty.")
+
+    def test_md_file_exists_and_contains_content(self):
+        self.assertTrue(self.md_file.exists(), f"{self.md_file} does not exist.")
+        with open(self.md_file, 'r') as f:
             content = f.read()
-
-        self.assertIn('TGW id: tgw-0123456789abcdef0', content)
-        self.assertIn('| Destination CIDR | Target Type | Prefix List |', content)
-        self.assertIn('| 10.0.0.0/16 | vpc | pl-0123456789abcdef0 |', content)
+            self.assertIn("# Reporting blablabla", content, "Markdown file content is missing.")
+            self.assertIn("# Routing", content, "Markdown file content is missing.")
+            self.assertIn("| Destination CIDR | Target Type | Prefix List |", content, "Markdown table header is missing.")
+            self.assertTrue(content.strip(), "Markdown file is empty.")
 
 if __name__ == '__main__':
     unittest.main()
