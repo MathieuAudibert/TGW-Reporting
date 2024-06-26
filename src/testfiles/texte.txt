@@ -1,8 +1,8 @@
 ### Réunions sur le Handover CIAP
 
-Durant mon stage à la Société Générale, j'ai participé à des réunions hebdomadaires essentielles, organisées tous les mardis et jeudis, centrées sur le handover du CIAP (Centralized Infrastructure Automation Platform). Ces réunions d'une heure étaient cruciales pour assurer une transition fluide et efficace des connaissances entre l'équipe Network, dont je faisais partie, et une autre équipe de l'entreprise.
+Durant mon stage à la Société Générale, j'ai participé à des réunions hebdomadaires essentielles, organisées tous les mardis et jeudis, centrées sur le handover du CIAP (Cloud Access Point). Ces réunions d'une heure étaient cruciales pour assurer une transition fluide et efficace des connaissances entre l'équipe Network, dont je faisais partie, et une autre équipe de l'entreprise.
 
-Le CIAP est une plateforme centrale d'automatisation de l'infrastructure qui joue un rôle vital dans la gestion et l'orchestration des ressources cloud de l'entreprise. L'objectif de ces réunions était de transmettre en détail le fonctionnement et les spécificités du CIAP à l'équipe destinataire, afin qu'elle puisse gérer et optimiser la plateforme de manière autonome à l'avenir.
+Le CIAP est une plateforme centrale permettant l'accès sécurisé et efficace aux ressources cloud de l'entreprise. L'objectif de ces réunions était de transmettre en détail le fonctionnement et les spécificités du CIAP à l'équipe destinataire, afin qu'elle puisse gérer et optimiser la plateforme de manière autonome à l'avenir.
 
 Chaque séance était structurée de manière à couvrir différents aspects du CIAP. Au début de chaque réunion, un membre de l'équipe Network présentait un segment spécifique de la plateforme, allant de l'architecture globale à des modules particuliers comme l'intégration continue et le déploiement continu (CI/CD), la gestion des configurations, et la surveillance des performances. Ces présentations étaient souvent accompagnées de démonstrations en direct, permettant à l'équipe destinataire de visualiser les processus en temps réel.
 
