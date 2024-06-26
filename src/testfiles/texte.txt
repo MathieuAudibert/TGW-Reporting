@@ -1,36 +1,21 @@
-import unittest
-from pathlib import Path
-import json
-import pandas as pd
+[tox]
+envlist = py38, py39, py310
 
-class TestTemplateFormat(unittest.TestCase):
+[testenv]
+deps =
+    pytest
+commands =
+    pytest
 
-    def setUp(self):
-        self.account_name = 'test_account'
-        self.output_dir = Path('output') / self.account_name
-        self.json_file = self.output_dir / f'tgw_output-{self.account_name}.json'
-        self.csv_file = self.output_dir / f'tgw_output-{self.account_name}.csv'
-        self.md_file = self.output_dir / f'tgw_output-{self.account_name}.md'
+[pytest]
+minversion = 6.0
+addopts = -ra -q
+testpaths =
+    utils/audit/tests
 
-    def test_json_file_exists_and_not_empty(self):
-        self.assertTrue(self.json_file.exists(), f"{self.json_file} does not exist.")
-        with open(self.json_file, 'r') as f:
-            data = json.load(f)
-            self.assertTrue(data, "JSON file is empty.")
-
-    def test_csv_file_exists_and_not_empty(self):
-        self.assertTrue(self.csv_file.exists(), f"{self.csv_file} does not exist.")
-        df = pd.read_csv(self.csv_file)
-        self.assertFalse(df.empty, "CSV file is empty.")
-
-    def test_md_file_exists_and_contains_content(self):
-        self.assertTrue(self.md_file.exists(), f"{self.md_file} does not exist.")
-        with open(self.md_file, 'r') as f:
-            content = f.read()
-            self.assertIn("# Reporting blablabla", content, "Markdown file content is missing.")
-            self.assertIn("# Routing", content, "Markdown file content is missing.")
-            self.assertIn("| Destination CIDR | Target Type | Prefix List |", content, "Markdown table header is missing.")
-            self.assertTrue(content.strip(), "Markdown file is empty.")
-
-if __name__ == '__main__':
-    unittest.main()
+[testenv:coverage]
+deps =
+    pytest
+    pytest-cov
+commands =
+    pytest --cov=utils/audit/src --cov-report=xml
