@@ -1,50 +1,15 @@
-import unittest
-from pathlib import Path
-from utils.audit.src.your_script import get_caller_identity, get_route_table_id, get_transit_gateways, to_json, to_csv
+### Réunions sur le Handover CIAP
 
-class TestYourScript(unittest.TestCase):
-    
-    def test_get_caller_identity(self):
-        self.assertIsNotNone(get_caller_identity())
-        
-    def test_get_route_table_id(self):
-        self.assertIsNotNone(get_route_table_id('tgw-12345678'))
-        
-    def test_get_transit_gateways(self):
-        self.assertIsNotNone(get_transit_gateways())
-    
-    def test_to_json(self):
-        data = {'key': 'value'}
-        acc_name = 'test_account'
-        to_json(data, acc_name)
-        self.assertTrue(Path(f'output/{acc_name}/tgw_output-{acc_name}.json').exists())
-    
-    def test_to_csv(self):
-        data = {
-            'tgw-12345678': {
-                'Owner': 'owner-123',
-                'State': 'available',
-                'Attachments': [
-                    {
-                        'AttachmentId': 'attach-123',
-                        'ResourceType': 'vpc',
-                        'Owner': 'owner-123',
-                        'Routes': [
-                            {
-                                'DestinationCidrBlock': '10.0.0.0/16',
-                                'TargetType': 'vpc',
-                                'PrefixList': 'pl-12345678'
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-        acc_name = 'test_account'
-        to_csv(data, acc_name)
-        self.assertTrue(Path(f'output/{acc_name}/tgw_output-{acc_name}.csv').exists())
-        df = pd.read_csv(f'output/{acc_name}/tgw_output-{acc_name}.csv')
-        self.assertFalse(df.empty)
+Durant mon stage à la Société Générale, j'ai participé à des réunions hebdomadaires essentielles, organisées tous les mardis et jeudis, centrées sur le handover du CIAP (Centralized Infrastructure Automation Platform). Ces réunions d'une heure étaient cruciales pour assurer une transition fluide et efficace des connaissances entre l'équipe Network, dont je faisais partie, et une autre équipe de l'entreprise.
 
-if __name__ == '__main__':
-    unittest.main()
+Le CIAP est une plateforme centrale d'automatisation de l'infrastructure qui joue un rôle vital dans la gestion et l'orchestration des ressources cloud de l'entreprise. L'objectif de ces réunions était de transmettre en détail le fonctionnement et les spécificités du CIAP à l'équipe destinataire, afin qu'elle puisse gérer et optimiser la plateforme de manière autonome à l'avenir.
+
+Chaque séance était structurée de manière à couvrir différents aspects du CIAP. Au début de chaque réunion, un membre de l'équipe Network présentait un segment spécifique de la plateforme, allant de l'architecture globale à des modules particuliers comme l'intégration continue et le déploiement continu (CI/CD), la gestion des configurations, et la surveillance des performances. Ces présentations étaient souvent accompagnées de démonstrations en direct, permettant à l'équipe destinataire de visualiser les processus en temps réel.
+
+L'interaction était un élément clé de ces réunions. L'équipe destinataire posait des questions pour clarifier les points complexes et partager leurs préoccupations ou suggestions. Cette interaction dynamique permettait de s'assurer que chaque aspect du CIAP était bien compris et que toutes les ambiguïtés étaient résolues. Les discussions portaient fréquemment sur des scénarios pratiques, ce qui aidait à contextualiser les informations théoriques.
+
+La documentation était également un sujet récurrent lors de ces réunions. Nous avons partagé des guides détaillés, des manuels d'utilisation, et des FAQ compilées pour faciliter la prise en main du CIAP. Ces documents étaient régulièrement mis à jour en fonction des questions et des feedbacks reçus pendant les séances.
+
+Ces réunions m'ont offert une perspective approfondie sur l'importance de la communication inter-équipes et la transmission des connaissances. Elles ont également illustré l'importance de la collaboration pour assurer le succès des projets de grande envergure comme le CIAP. L'expérience m'a permis de renforcer mes compétences en présentation et en gestion de projet, tout en améliorant ma compréhension technique de la plateforme.
+
+En conclusion, les réunions sur le handover du CIAP ont été une composante essentielle de mon stage, enrichissant mon apprentissage pratique et me préparant à des défis professionnels futurs. Elles ont démontré l'engagement de la Société Générale à maintenir une communication claire et efficace entre ses équipes, garantissant ainsi la continuité et la performance de ses opérations technologiques.
