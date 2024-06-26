@@ -1,21 +1,50 @@
-[tox]
-envlist = py38, py39, py310
+import unittest
+from pathlib import Path
+from utils.audit.src.your_script import get_caller_identity, get_route_table_id, get_transit_gateways, to_json, to_csv
 
-[testenv]
-deps =
-    pytest
-commands =
-    pytest
+class TestYourScript(unittest.TestCase):
+    
+    def test_get_caller_identity(self):
+        self.assertIsNotNone(get_caller_identity())
+        
+    def test_get_route_table_id(self):
+        self.assertIsNotNone(get_route_table_id('tgw-12345678'))
+        
+    def test_get_transit_gateways(self):
+        self.assertIsNotNone(get_transit_gateways())
+    
+    def test_to_json(self):
+        data = {'key': 'value'}
+        acc_name = 'test_account'
+        to_json(data, acc_name)
+        self.assertTrue(Path(f'output/{acc_name}/tgw_output-{acc_name}.json').exists())
+    
+    def test_to_csv(self):
+        data = {
+            'tgw-12345678': {
+                'Owner': 'owner-123',
+                'State': 'available',
+                'Attachments': [
+                    {
+                        'AttachmentId': 'attach-123',
+                        'ResourceType': 'vpc',
+                        'Owner': 'owner-123',
+                        'Routes': [
+                            {
+                                'DestinationCidrBlock': '10.0.0.0/16',
+                                'TargetType': 'vpc',
+                                'PrefixList': 'pl-12345678'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        acc_name = 'test_account'
+        to_csv(data, acc_name)
+        self.assertTrue(Path(f'output/{acc_name}/tgw_output-{acc_name}.csv').exists())
+        df = pd.read_csv(f'output/{acc_name}/tgw_output-{acc_name}.csv')
+        self.assertFalse(df.empty)
 
-[pytest]
-minversion = 6.0
-addopts = -ra -q
-testpaths =
-    utils/audit/tests
-
-[testenv:coverage]
-deps =
-    pytest
-    pytest-cov
-commands =
-    pytest --cov=utils/audit/src --cov-report=xml
+if __name__ == '__main__':
+    unittest.main()
