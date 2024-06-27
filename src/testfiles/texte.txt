@@ -1,44 +1,49 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
 from typing import Dict, Any, List
 import json
+import os
 
 # Importer les fonctions à tester
-from votre_module import get_caller_identity, get_route_table_id, get_route_tables, get_transit_gateways, to_json, to_csv, read_json_file, generate_markdown
+from votre_module import (
+    get_caller_identity, get_route_table_id, get_route_tables,
+    get_transit_gateways, to_json, to_csv, read_json_file,
+    generate_markdown, main
+)
 
 class TestAWSFunctions(unittest.TestCase):
+
     @patch('boto3.client')
     def test_get_caller_identity(self, mock_boto_client):
-        # Configurer le client simulé
         mock_sts_client = Mock()
         mock_sts_client.get_caller_identity.return_value = {'Account': '123456789012'}
-        
-        # Appeler la fonction avec le client simulé
         account_id = get_caller_identity(mock_sts_client)
-        
-        # Vérifier les résultats
         self.assertEqual(account_id, '123456789012')
         mock_sts_client.get_caller_identity.assert_called_once()
 
     @patch('boto3.client')
     def test_get_route_table_id(self, mock_boto_client):
-        # Configurer le client simulé
         mock_ec2_client = Mock()
         mock_ec2_client.describe_transit_gateway_route_tables.return_value = {
             'TransitGatewayRouteTables': [{'TransitGatewayRouteTableId': 'tgw-rtb-0123456789abcdef'}]
         }
-        
-        # Appeler la fonction avec le client simulé
         route_table_id = get_route_table_id('tgw-0123456789abcdef', mock_ec2_client)
-        
-        # Vérifier les résultats
         self.assertEqual(route_table_id, 'tgw-rtb-0123456789abcdef')
         mock_ec2_client.describe_transit_gateway_route_tables.assert_called_once()
 
     @patch('boto3.client')
+    def test_get_route_table_id_no_tables(self, mock_boto_client):
+        mock_ec2_client = Mock()
+        mock_ec2_client.describe_transit_gateway_route_tables.return_value = {
+            'TransitGatewayRouteTables': []
+        }
+        route_table_id = get_route_table_id('tgw-0123456789abcdef', mock_ec2_client)
+        self.assertIsNone(route_table_id)
+        mock_ec2_client.describe_transit_gateway_route_tables.assert_called_once()
+
+    @patch('boto3.client')
     def test_get_route_tables(self, mock_boto_client):
-        # Configurer le client simulé
         mock_ec2_client = Mock()
         mock_ec2_client.describe_transit_gateway_route_tables.return_value = {
             'TransitGatewayRouteTables': [{'TransitGatewayRouteTableId': 'tgw-rtb-0123456789abcdef'}]
@@ -52,11 +57,7 @@ class TestAWSFunctions(unittest.TestCase):
                 }
             ]
         }
-        
-        # Appeler la fonction avec le client simulé
         routes = get_route_tables('tgw-0123456789abcdef', mock_ec2_client)
-        
-        # Vérifier les résultats
         expected_routes = [
             {
                 'DestinationCidrBlock': '10.0.0.0/16',
@@ -70,7 +71,6 @@ class TestAWSFunctions(unittest.TestCase):
 
     @patch('boto3.client')
     def test_get_transit_gateways(self, mock_boto_client):
-        # Configurer le client simulé
         mock_ec2_client = Mock()
         mock_ec2_client.describe_transit_gateways.return_value = {
             'TransitGateways': [
@@ -99,11 +99,7 @@ class TestAWSFunctions(unittest.TestCase):
                 }
             ]
         }
-        
-        # Appeler la fonction avec le client simulé
         transit_gateways = get_transit_gateways(mock_ec2_client)
-        
-        # Vérifier les résultats
         expected_gateways = {
             'tgw-0123456789abcdef': {
                 'Owner': '123456789012',
@@ -128,6 +124,151 @@ class TestAWSFunctions(unittest.TestCase):
         mock_ec2_client.describe_transit_gateways.assert_called_once()
         mock_ec2_client.describe_transit_gateway_attachments.assert_called_once()
         mock_ec2_client.search_transit_gateway_routes.assert_called_once()
+
+    def test_to_json(self):
+        data = {'test': 'data'}
+        acc_name = 'test_account'
+        to_json(data, acc_name)
+        output_path = Path(f'output/{acc_name}/tgw_output-{acc_name}.json')
+        self.assertTrue(output_path.exists())
+        with open(output_path, 'r') as f:
+            loaded_data = json.load(f)
+        self.assertEqual(loaded_data, data)
+        os.remove(output_path)
+
+    def test_to_csv(self):
+        data = {
+            'tgw-0123456789abcdef': {
+                'Owner': '123456789012',
+                'State': 'available',
+                'Attachments': [
+                    {
+                        'AttachmentId': 'tgw-attach-0123456789abcdef',
+                        'ResourceType': 'vpc',
+                        'Owner': '123456789012',
+                        'Routes': [
+                            {
+                                'DestinationCidrBlock': '10.0.0.0/16',
+                                'TargetType': 'vpc',
+                                'PrefixList': 'pl-0123456789abcdef'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        acc_name = 'test_account'
+        to_csv(data, acc_name)
+        output_path = Path(f'output/{acc_name}/tgw_output-{acc_name}.csv')
+        self.assertTrue(output_path.exists())
+        df = pd.read_csv(output_path)
+        self.assertEqual(len(df), 1)
+        os.remove(output_path)
+
+    def test_read_json_file(self):
+        data = {'test': 'data'}
+        json_path = Path('test.json')
+        with open(json_path, 'w') as f:
+            json.dump(data, f)
+        loaded_data = read_json_file(json_path)
+        self.assertEqual(loaded_data, data)
+        os.remove(json_path)
+
+    def test_generate_markdown(self):
+        json_data = {
+            'tgw-0123456789abcdef': {
+                'Owner': '123456789012',
+                'State': 'available',
+                'Attachments': [
+                    {
+                        'AttachmentId': 'tgw-attach-0123456789abcdef',
+                        'ResourceType': 'vpc',
+                        'Owner': '123456789012',
+                        'Routes': [
+                            {
+                                'DestinationCidrBlock': '10.0.0.0/16',
+                                'TargetType': 'vpc',
+                                'PrefixList': 'pl-0123456789abcdef'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        output_md_path = Path('test_output.md')
+        generate_markdown(json_data, output_md_path)
+        self.assertTrue(output_md_path.exists())
+        os.remove(output_md_path)
+
+    @patch('boto3.Session')
+    @patch('votre_module.get_caller_identity')
+    @patch('votre_module.get_transit_gateways')
+    @patch('votre_module.to_json')
+    @patch('votre_module.to_csv')
+    @patch('votre_module.read_json_file')
+    @patch('votre_module.generate_markdown')
+    def test_main(self, mock_generate_markdown, mock_read_json_file, mock_to_csv, mock_to_json, mock_get_transit_gateways, mock_get_caller_identity, mock_boto_session):
+        # Setup mocks
+        mock_session_instance = Mock()
+        mock_boto_session.return_value = mock_session_instance
+        mock_session_instance.client.return_value = Mock()
+        mock_session_instance.profile_name = 'test_profile'
+
+        mock_get_caller_identity.return_value = '123456789012'
+        mock_get_transit_gateways.return_value = {
+            'tgw-0123456789abcdef': {
+                'Owner': '123456789012',
+                'State': 'available',
+                'Attachments': [
+                    {
+                        'AttachmentId': 'tgw-attach-0123456789abcdef',
+                        'ResourceType': 'vpc',
+                        'Owner': '123456789012',
+                        'Routes': [
+                            {
+                                'DestinationCidrBlock': '10.0.0.0/16',
+                                'TargetType': 'vpc',
+                                'PrefixList': 'pl-0123456789abcdef'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+        
+        mock_read_json_file.return_value = {
+            'tgw-0123456789abcdef': {
+                'Owner': '123456789012',
+                'State': 'available',
+                'Attachments': [
+                    {
+                        'AttachmentId': 'tgw-attach-0123456789abcdef',
+                        'ResourceType': 'vpc',
+                        'Owner': '123456789012',
+                        'Routes': [
+                            {
+                                'DestinationCidrBlock': '10.0.0.0/16',
+                                'TargetType': 'vpc',
+                                'PrefixList': 'pl-0123456789abcdef'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
+        # Run main
+        with patch('pathlib.Path.exists', return_value=True):
+            main()
+
+        # Check calls
+        mock_boto_session.assert_called_once()
+        mock_get_caller_identity.assert_called_once()
+        mock_get_transit_gateways.assert_called_once()
+        mock_to_json.assert_called_once()
+        mock_to_csv.assert_called_once()
+        mock_read_json_file.assert_called_once()
+        mock_generate_markdown.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()
